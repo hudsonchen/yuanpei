@@ -4,12 +4,13 @@ import sqlalchemy
 import numpy as np
 import os
 import json
+import copy
 
 
 def generate_data(path, N):
-    age = np.random.randint(5, 65, size=(N, 1))
+    age = np.random.normal(65, 5, size=(N, 1))
     sodium = age / 18. + np.random.normal(0, 1, size=(N, 1))
-    sodium = (sodium >= 2.0).astype('float')
+    sodium = (sodium >= 3.5).astype('float')
     print(f"The number of treated group is {sodium.sum()}, and the number of control group is is {N - sodium.sum()}.\n")
     blood_pressure = 1.05 * sodium + 2.00 * age + np.random.normal(0, 1, size=(N, 1))
     protein = 2.00 * blood_pressure + 2.80 * sodium + np.random.normal(0, 1, size=(N, 1))
@@ -32,34 +33,36 @@ def main():
     dataset_dir = '../brady_neal/dyy275_data'
     data = generate_data(dataset_dir, N)
 
-    temp = np.array(data['sodium'])
-    Y_1 = np.array(data['blood_pressure'])[temp == 1][:, None]
-    Y_0 = np.array(data['blood_pressure'])[temp == 0][:, None]
+    T = np.array(data['sodium'])
+    Y_1 = np.array(data['blood_pressure'])[T == 1][:, None]
+    Y_0 = np.array(data['blood_pressure'])[T == 0][:, None]
+    Y = np.array(data['blood_pressure'])
 
     # The adjustment set is {}
     ATE = Y_1.mean() - Y_0.mean()
     print(f"ATE with no adjustment set is {ATE}.\n")
     
     # The adjustment set is {Age}
-    W = np.array(data['age'])[:, None]
-    W_1 = np.array(data['age'])[temp == 1][:, None]
-    W_1_with_bias = np.append(W_1, np.array([[1] * len(W_1)]).T, axis=1)
-    W_0 = np.array(data['age'])[temp == 0][:, None]
-    W_0_with_bias = np.append(W_0, np.array([[1] * len(W_0)]).T, axis=1)
-    coeff_1 = np.linalg.inv(W_1_with_bias.T @ W_1_with_bias + eps * np.eye(2)) @ W_1_with_bias.T @ Y_1
-    coeff_0 = np.linalg.inv(W_0_with_bias.T @ W_0_with_bias + eps * np.eye(2)) @ W_0_with_bias.T @ Y_0
-    ATE = (coeff_1[0] * W + coeff_1[1]).mean() - (coeff_0[0] * W + coeff_0[1]).mean()
+    X = np.array(data['age'])
+    XT = np.append(X, T, axis=1)
+    XT_with_bias = np.append(XT, np.array([[1] * len(XT)]).T, axis=1)
+    XT_1 = copy.deepcopy(XT_with_bias)
+    XT_1[:, 1] = 1
+    XT_0 = copy.deepcopy(XT_with_bias)
+    XT_0[:, 1] = 0
+    coeff = np.linalg.inv(XT_with_bias.T @ XT_with_bias + eps * np.eye(3)) @ XT_with_bias.T @ Y
+    ATE = (XT_1 @ coeff).mean() - (XT_0 @ coeff).mean()
     print(f"ATE with Age as adjustment set is {ATE}.\n")
 
-    ## The adjustment set is {Age, protein}
-    Z = np.array(data['protein'])[:, None]
-    Z_1 = np.array(data['protein'])[temp == 1][:, None]
-    ZW_1_with_bias = np.concatenate((W_1, Z_1, np.array([[1] * len(Z_1)]).T), axis=1)
-    Z_0 = np.array(data['protein'])[temp == 0][:, None]
-    ZW_0_with_bias = np.concatenate((W_0, Z_0, np.array([[1] * len(Z_0)]).T), axis=1)
-    coeff_1 = np.linalg.inv(ZW_1_with_bias.T @ ZW_1_with_bias + eps * np.eye(3)) @ ZW_1_with_bias.T @ Y_1
-    coeff_0 = np.linalg.inv(ZW_0_with_bias.T @ ZW_0_with_bias + eps * np.eye(3)) @ ZW_0_with_bias.T @ Y_0
-    ATE = (coeff_1[0] * W + coeff_1[1] * Z + coeff_1[2]).mean() - (coeff_0[0] * W + coeff_0[1] * Z + coeff_0[2]).mean()
+    # The adjustment set is {Age, protein}
+    XT = np.concatenate((np.array(data['age']), np.array(data['protein']), T), axis=1)
+    XT_with_bias = np.append(XT, np.array([[1] * len(XT)]).T, axis=1)
+    XT_1 = copy.deepcopy(XT_with_bias)
+    XT_1[:, 2] = 1
+    XT_0 = copy.deepcopy(XT_with_bias)
+    XT_0[:, 2] = 0
+    coeff = np.linalg.inv(XT_with_bias.T @ XT_with_bias + eps * np.eye(4)) @ XT_with_bias.T @ Y
+    ATE = (XT_1 @ coeff).mean() - (XT_0 @ coeff).mean()
     print(f"ATE with Age and protein as adjustment set is {ATE}.\n")
     return 0
 
