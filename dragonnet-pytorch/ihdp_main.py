@@ -57,8 +57,6 @@ def main():
     print(f"The predicted ATE on train set is {ATE_pred_train}\n\n")
     treat_acc_train = np.equal(t_pred_train, t_train).mean()
     print(f"The predicted accuracy of treatment on train set is {treat_acc_train}\n\n")
-    
-    Hudson = 'cool'
     return
 
 

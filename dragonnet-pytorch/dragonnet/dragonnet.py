@@ -1,6 +1,7 @@
 from functools import partial
 import torch
 import numpy as np
+import sklearn
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
 from dragonnet.model import DragonNetBase, dragonnet_loss, tarreg_loss, EarlyStopper
