@@ -29,6 +29,13 @@ def main():
     t, y, y_cf, mu_0, mu_1 = load_all_other_crap(data)
     mean, std, train_index, test_index, x_train, y_train, t_train, x_test, y_test, t_test = preprocess(t, y, x)
 
+    """
+    Here is to load your own dataset
+    x_train = ...
+    y_train = ...
+    t_train = ...
+    """
+
     # Train the Dragon Net
     model = DragonNet(x_train.shape[1], epochs=5, learning_rate=1e-3)
     model.fit(x_train, y_train, t_train)

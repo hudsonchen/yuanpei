@@ -57,17 +57,23 @@ class DragonNetBase(nn.Module):
             trainable epsilon parameter
         """
         x = F.relu(self.fc1(inputs))
+        x = nn.Dropout(0.2)(x)
         x = F.relu(self.fc2(x))
+        x = nn.Dropout(0.2)(x)
         z = F.relu(self.fcz(x))
 
         t_pred = torch.sigmoid(self.treat_out(z))
 
         y0 = F.relu(self.y0_fc1(z))
+        y0 = nn.Dropout(0.2)(y0)
         y0 = F.relu(self.y0_fc2(y0))
+        y0 = ...
         y0 = self.y0_out(y0)
 
         y1 = F.relu(self.y1_fc1(z))
+        y1 = ...
         y1 = F.relu(self.y1_fc2(y1))
+        y1 = ...
         y1 = self.y1_out(y1)
 
         eps = self.epsilon(torch.ones_like(t_pred)[:, 0:1])
