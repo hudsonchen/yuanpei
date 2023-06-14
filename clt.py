@@ -26,10 +26,8 @@ x = np.linspace(mu - 3*sigma, mu + 3*sigma, 1000)
 # samples_std = np.random.normal(mu, sigma, 10000)
 # plt.hist(samples_std, bins=30, color='red', alpha=0.8, density=True)
 
-
 import scipy
 from scipy import stats
 plt.plot(x, stats.norm.pdf(x, mu, sigma), color='black', linewidth=5)
-
 plt.grid()
 plt.show()
