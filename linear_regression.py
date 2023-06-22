@@ -21,7 +21,7 @@ def simple_linear_regression(X, Y):
 def plot_regression(X, Y, m, b):
     plt.figure()
     plt.scatter(X, Y)
-    # plt.plot(X, m * X + b, color='red') # The fitted line
+    plt.plot(X, m * X + b, color='red') # The fitted line
     plt.savefig('./figures/regression/linear_regression.png')
     plt.show()
 

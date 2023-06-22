@@ -11,6 +11,7 @@ from torch.optim.lr_scheduler import StepLR
 import matplotlib.pyplot as plt
 
 
+# This is CNN architecture, feel free to skip it.
 class CNN_Net(nn.Module):
     def __init__(self):
         super(CNN_Net, self).__init__()
@@ -37,6 +38,7 @@ class CNN_Net(nn.Module):
         return output
 
 
+# This is the architecture covered in class.
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -52,15 +54,17 @@ class Net(nn.Module):
         return output
 
 
+# This the code for training and gradient descent.
 def train(args, model, device, train_loader, optimizer, epoch):
     model.train()
+    # this the the iteration of each batch within the entire dataset
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model.forward(data)
-        loss = F.nll_loss(output, target)
-        loss.backward()
-        optimizer.step()
+        loss = F.nll_loss(output, target)  # this is the cross entropy loss for classification
+        loss.backward()  # This lilne computes the gradient of all the parameters
+        optimizer.step()  # This line updates the parameters
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
@@ -92,7 +96,7 @@ def test(model, device, test_loader):
     fig, ax = plt.subplots(3, 3)
     ax = ax.flatten()
     for i in range(9):
-        image = np.transpose(data[i, :].cpu().numpy(), (1,2,0))
+        image = np.transpose(data[i, :].cpu().numpy(), (1, 2, 0))
         ax[i].imshow(image, cmap='gray')
         ax[i].set_title(f'Classified as {pred[i].cpu().numpy()[0]}')
         ax[i].axis('off')
@@ -151,6 +155,7 @@ def main():
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,))
     ])
+    # this is the part to load the dataset
     dataset1 = datasets.MNIST('../data', train=True, download=True,
                               transform=transform)
     dataset2 = datasets.MNIST('../data', train=False,
@@ -161,7 +166,8 @@ def main():
     model = Net().to(device)
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
-    scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
+    scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma) # Ignore this for now
+    # This is the main training loop for all epochs
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
         test(model, device, test_loader)

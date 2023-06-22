@@ -18,7 +18,7 @@ def logistic_regression(X, y, alpha, iterations):
         z = np.dot(X, theta)
         h = sigmoid(z)
         gradient = np.dot(X.T, (h - y)) / m
-        theta -= alpha * gradient
+        theta = theta - alpha * gradient
 
         cost = -(1 / m) * np.sum(y * np.log(h) + (1 - y) * np.log(1 - h))
         cost_history.append(cost)
