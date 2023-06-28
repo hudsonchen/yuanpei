@@ -10,11 +10,10 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.autograd import Variable
 
-
 # G(z)
 class generator(nn.Module):
     # initializers
-    def __init__(self, input_size=32, n_class=10):
+    def __init__(self, input_size=32, n_class = 10):
         super(generator, self).__init__()
         self.fc1 = nn.Linear(input_size, 256)
         self.fc2 = nn.Linear(self.fc1.out_features, 512)
@@ -29,7 +28,6 @@ class generator(nn.Module):
         x = F.tanh(self.fc4(x))
 
         return x
-
 
 class discriminator(nn.Module):
     # initializers
@@ -52,19 +50,17 @@ class discriminator(nn.Module):
 
         return x
 
-
-fixed_z_ = torch.randn((5 * 5, 100))
-
-
-def show_result(num_epoch, show=False, save=False, path='./result.png', isFix=False):
-    z_ = torch.randn((5 * 5, 100))
+fixed_z_ = torch.randn((5 * 5, 100))    # fixed noise
+fixed_z_ = Variable(fixed_z_.cuda(), volatile=True)
+def show_result(num_epoch, show = False, save = False, path = 'result.png', isFix=False):
+    z_ = torch.randn((5*5, 100))
+    z_ = Variable(z_.cuda(), volatile=True)
 
     G.eval()
-    with torch.no_grad():
-        if isFix:
-            test_images = G(fixed_z_.to("cuda"))
-        else:
-            test_images = G(z_.to("cuda"))
+    if isFix:
+        test_images = G(fixed_z_)
+    else:
+        test_images = G(z_)
     G.train()
 
     size_figure_grid = 5
@@ -73,7 +69,7 @@ def show_result(num_epoch, show=False, save=False, path='./result.png', isFix=Fa
         ax[i, j].get_xaxis().set_visible(False)
         ax[i, j].get_yaxis().set_visible(False)
 
-    for k in range(5 * 5):
+    for k in range(5*5):
         i = k // 5
         j = k % 5
         ax[i, j].cla()
@@ -88,8 +84,7 @@ def show_result(num_epoch, show=False, save=False, path='./result.png', isFix=Fa
     else:
         plt.close()
 
-
-def show_train_hist(hist, show=False, save=False, path='./Train_hist.png'):
+def show_train_hist(hist, show = False, save = False, path = 'Train_hist.png'):
     x = range(len(hist['D_losses']))
 
     y1 = hist['D_losses']
@@ -113,7 +108,6 @@ def show_train_hist(hist, show=False, save=False, path='./Train_hist.png'):
     else:
         plt.close()
 
-
 # training parameters
 batch_size = 128
 lr = 0.0002
@@ -121,16 +115,16 @@ train_epoch = 100
 
 # data_loader
 transform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize(mean=0.5, std=(0.5))
+        transforms.ToTensor(),
+        transforms.Normalize(mean=0.5, std=(0.5))
 ])
 train_loader = torch.utils.data.DataLoader(
     datasets.MNIST('../data', train=True, download=True, transform=transform),
     batch_size=batch_size, shuffle=True)
 
 # network
-G = generator(input_size=100, n_class=28 * 28)
-D = discriminator(input_size=28 * 28, n_class=1)
+G = generator(input_size=100, n_class=28*28)
+D = discriminator(input_size=28*28, n_class=1)
 G.cuda()
 D.cuda()
 
@@ -205,14 +199,15 @@ for epoch in range(train_epoch):
         (epoch + 1), train_epoch, torch.mean(torch.FloatTensor(D_losses)), torch.mean(torch.FloatTensor(G_losses))))
     p = './MNIST_GAN_results/Random_results/MNIST_GAN_' + str(epoch + 1) + '.png'
     fixed_p = './MNIST_GAN_results/Fixed_results/MNIST_GAN_' + str(epoch + 1) + '.png'
-    show_result((epoch + 1), save=True, path=p, isFix=False)
-    show_result((epoch + 1), save=True, path=fixed_p, isFix=True)
+    show_result((epoch+1), save=True, path=p, isFix=False)
+    show_result((epoch+1), save=True, path=fixed_p, isFix=True)
     train_hist['D_losses'].append(torch.mean(torch.FloatTensor(D_losses)))
     train_hist['G_losses'].append(torch.mean(torch.FloatTensor(G_losses)))
 
+
 print("Training finish!... save training results")
-# torch.save(G.state_dict(), "./MNIST_GAN_results/generator_param.pkl")
-# torch.save(D.state_dict(), "./MNIST_GAN_results/discriminator_param.pkl")
+torch.save(G.state_dict(), "./MNIST_GAN_results/generator_param.pkl")
+torch.save(D.state_dict(), "./MNIST_GAN_results/discriminator_param.pkl")
 with open('./MNIST_GAN_results/train_hist.pkl', 'wb') as f:
     pickle.dump(train_hist, f)
 
@@ -223,4 +218,3 @@ for e in range(train_epoch):
     img_name = './MNIST_GAN_results/Fixed_results/MNIST_GAN_' + str(e + 1) + '.png'
     images.append(imageio.imread(img_name))
 imageio.mimsave('./MNIST_GAN_results/generation_animation.gif', images, duration=2)
-

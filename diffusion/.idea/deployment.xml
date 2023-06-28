@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" autoUpload="Always" serverName="zonghao@128.16.15.139:22" remoteFilesAllowedToDisappearOnAutoupload="false">
+    <serverData>
+      <paths name="timner@tim:22 agent">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/zonghao/my_diffusion" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="zonghao@128.16.15.139:22">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/zonghao/my_diffusion/" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
+  </component>
+</project>
